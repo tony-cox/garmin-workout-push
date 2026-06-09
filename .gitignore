@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Garmin auth — never commit credentials or cached tokens
+.env
+.garminconnect/
+garmin_tokens.json
+
+# Personal source material — kept locally as reference for building the library, not published
+source_data/
+
+# OS / editor
+.DS_Store
+*.swp
