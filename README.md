@@ -133,17 +133,51 @@ error · `1` unexpected.
 
 ## Authentication
 
-Interactive each run, nothing persisted — the safe default for a shared tool.
+The library and the CLI perform the *same* Garmin login, but at different
+layers: **the library is handed credentials; the CLI gathers them.** That split
+is deliberate — the core never prompts, reads stdin, or prints, so it can be
+driven by any front-end (a TUI, a web form, a scheduled job).
 
-- Email + password are prompted at runtime (password via `getpass`, not echoed).
+### In the library
+
+`GarminWorkoutClient` takes credentials directly and owns no UI. It never
+prompts; it raises typed exceptions and lets the caller decide how to react.
+
+```python
+client = GarminWorkoutClient(
+    "me@example.com",
+    "password",
+    prompt_mfa=lambda: input("MFA code: "),  # called only if Garmin challenges
+    persist_tokens=False,                    # default — see below
+)
+client.login()          # explicit, or skip it: push()/schedule() log in on first use
+```
+
+- **MFA is yours to supply.** Pass a zero-arg `prompt_mfa` callable that returns
+  the code (sourced from wherever suits your front-end). If it's `None` and
+  Garmin challenges, login raises rather than blocking on input.
+- **Token persistence is off by default.** With `persist_tokens=False` the
+  client logs in without a tokenstore, so each run re-authenticates and nothing
+  is written to disk. Opt in with `persist_tokens=True` (and an optional
+  `tokenstore=...` path). Note: the underlying library also reads a
+  `GARMINTOKENS` environment variable if set — leave it unset to keep
+  persistence truly off.
+
+### From the CLI
+
+The bundled CLI is just one front-end. It collects the same credentials
+interactively, then hands them to the library — nothing persisted:
+
+- Email from `--email`, or prompted if omitted.
+- Password via `getpass` (not echoed).
 - **MFA:** if Garmin challenges, you're prompted for the code in the terminal.
-- **No token cache by default:** the client logs in without a tokenstore, so
-  each run re-authenticates and nothing sensitive is left on disk. (The library
-  supports opt-in caching via `GarminWorkoutClient(..., persist_tokens=True)`;
-  leave the `GARMINTOKENS` environment variable unset to keep persistence off.)
+- The CLI never enables the token cache.
+
+### Credential hygiene (both layers)
 
 `.gitignore` defensively excludes `.env`, `.garminconnect/`, and
-`garmin_tokens.json`.
+`garmin_tokens.json`, so cached tokens or env files can't be committed by
+accident.
 
 ---
 

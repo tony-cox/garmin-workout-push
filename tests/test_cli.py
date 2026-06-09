@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 
 import pytest
@@ -31,6 +32,16 @@ def test_dry_run_json_output(capsys):
     assert payload["sport"] == "running"
     assert payload["steps"] == 8
     assert payload["workout"]["workoutSegments"][0]["workoutSteps"]
+
+
+def test_garminconnect_logs_quieted_by_default():
+    cli.main([str(EXAMPLES / "3x3k.yaml"), "--dry-run"])
+    assert logging.getLogger("garminconnect").level == logging.ERROR
+
+
+def test_verbose_restores_garminconnect_logs():
+    cli.main([str(EXAMPLES / "3x3k.yaml"), "--dry-run", "--verbose"])
+    assert logging.getLogger("garminconnect").level == logging.DEBUG
 
 
 def test_validation_error_exit_code(capsys):

@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import getpass
 import json
+import logging
 import sys
 from typing import Any
 
@@ -49,6 +50,7 @@ EXIT_API = 4
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+    _configure_logging(args.verbose)
 
     try:
         definition = load_workout(args.workout_file)
@@ -282,8 +284,30 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument(
         "--cn", action="store_true", help="use the Garmin China backend"
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="show the underlying garminconnect login/transport logs "
+        "(useful when a push fails)",
+    )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     return parser.parse_args(argv)
+
+
+def _configure_logging(verbose: bool) -> None:
+    """Tame the underlying library's log output.
+
+    ``python-garminconnect`` logs a WARNING for every login strategy it falls
+    through (e.g. a 429 or 403 on the way to a strategy that succeeds). On a
+    successful run that chatter is just noise and looks like an error, so by
+    default we raise its level to ERROR. ``--verbose`` restores the full
+    diagnostics for troubleshooting a genuine failure.
+    """
+    logging.basicConfig(level=logging.WARNING)
+    logging.getLogger("garminconnect").setLevel(
+        logging.DEBUG if verbose else logging.ERROR
+    )
 
 
 def _fail(message: str, code: int, as_json: bool) -> int:
