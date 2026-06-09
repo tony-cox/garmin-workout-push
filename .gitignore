@@ -2,9 +2,12 @@
 __pycache__/
 *.py[cod]
 .venv/
+.venv-win/
 venv/
 *.egg-info/
 .pytest_cache/
+build/
+dist/
 
 # Garmin auth — never commit credentials or cached tokens
 .env

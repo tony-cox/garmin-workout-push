@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "garmin-workout-push"
+version = "0.1.0"
+description = "Define structured workouts as simple files and push them to Garmin Connect."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "garmin-workout-push contributors" }]
+keywords = ["garmin", "workout", "running", "cycling", "swimming", "connect"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "garminconnect[workout]>=0.3.5",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+garmin-workout-push = "garmin_workout_push.cli:main"
+gwpush = "garmin_workout_push.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/tonyjohnwhitfield/garmin-workout-push"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,6 +1,6 @@
 # garmin-workout-push
 
-> **Status: spec complete, not yet built.** No source code exists yet. The design is fully specified in [`garmin-workout-push-spec.md`](./garmin-workout-push-spec.md) — **read that first; it is the source of truth.** This file is the quick orientation + handoff.
+> **Status: built (v0.1.0), passing tests.** The library + CLI are implemented under `src/garmin_workout_push/` per the spec. [`garmin-workout-push-spec.md`](./garmin-workout-push-spec.md) remains the design source of truth; this file is the quick orientation + handoff. Not yet device-tested against a live Garmin account (see Verification below).
 
 ## What this is
 
@@ -23,9 +23,13 @@ Two cleanly separated layers — keep the boundary strict when building:
 
 See spec §13 for the full locked-decisions log.
 
-## Planned repo layout
+## Repo layout (built)
 
-`src/garmin_workout_push/{model,loader,builder,client,cli}.py` · `examples/*.yaml` · `tests/` (loader/builder unit-tested with no network, client mocked) · `pyproject.toml` (console scripts `garmin-workout-push` + `gwpush` alias) · `README.md`. None of this exists yet.
+`src/garmin_workout_push/{model,loader,builder,client,cli,exceptions}.py` · `examples/{tempo-16k,3x3k}.yaml` · `tests/` (loader/builder run offline, client + CLI mocked — 48 tests) · `pyproject.toml` (console scripts `garmin-workout-push` + `gwpush` alias) · `README.md`.
+
+**Build/test notes (sandbox):** the dependency installs into a Python 3.12 venv at `.venv/` (gitignored); the default sandbox python is 3.14, which lacks `curl_cffi` wheels. Run tests with `.venv/bin/python -m pytest`. The venv was bootstrapped with `get-pip.py` because `ensurepip` is missing.
+
+**One schema decision worth knowing:** `garminconnect.workout.ConditionType.DISTANCE = 1` is *wrong* for the live workout-service (and unused by the library's own helpers). The builder defines authoritative end-condition ids itself: `1=lap.button`, `2=time`, `3=distance`, `7=iterations` (time/iterations confirmed by the library's working `create_*` helpers). See `builder.py` docstring.
 
 ## `source_data/` (gitignored — local reference only)
 
@@ -42,7 +46,7 @@ Personal/reference material that informed the design; **never published**. Usefu
 
 ## Where things stand (handoff)
 
-- **Done:** library survey (the four linked uploader repos all target the wrong *activity* endpoint — rejected; `python-garminconnect` chosen). Spec written and revised to be generic/OSS-ready with the two-layer split. Git repo initialised (branch `main`, MIT LICENSE). Personal files moved to gitignored `source_data/` and the original commit that contained them was discarded — history is clean. Tracked files: `.gitignore`, `LICENSE`, `garmin-workout-push-spec.md`, `CLAUDE.md`.
-- **No remote** configured yet.
-- **Next step:** start building per the spec — likely `model` + `loader` + `builder` with unit tests first (pure, no network), then `client`, then `cli`, then `examples/` + `README`.
-- **Open question to resolve before/while building:** sport scope for v1 — running only (with cycling/swimming as a designed-in extension point), or build all three sports now? Spec currently assumes running-first.
+- **Done:** full implementation (model/loader/builder/client/cli/exceptions), two example workouts, 48 passing tests, README with schema docs, `pyproject.toml` with both console scripts. Sport scope resolved: **all three sports wired** (running/cycling/swimming) since the builder machinery is shared and `garminconnect` provides all three typed classes — running is still the proven/tested path.
+- **Not committed yet** — working tree only; no commit made (waiting on user). **No remote** configured.
+- **Open follow-up (unchanged from spec §13):** move/remove the personal plan docs + FIT artifacts before publishing (they're already gitignored under `source_data/`).
+- **The one thing left that code can't do:** device-side verification — push a real workout to a live account and confirm targets display on the watch. The CLI does API-side verification automatically; the device check is manual.

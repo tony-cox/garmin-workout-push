@@ -1,0 +1,10 @@
+# Simple 3 × 3k @ pace session with jog recoveries.
+name: "3 × 3k @ threshold"
+sport: running
+steps:
+  - { kind: warmup, time: "10:00", target: open }
+  - repeat: 3
+    steps:
+      - { kind: interval, distance_km: 3.0, target: { pace: ["4:00", "4:05"] }, name: "3k rep" }
+      - { kind: recovery, time: "3:00", target: open }
+  - { kind: cooldown, time: "10:00", target: open }

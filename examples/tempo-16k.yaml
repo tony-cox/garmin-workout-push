@@ -1,0 +1,12 @@
+# Distance-based tempo session: warmup, 2× (tempo + recovery), cooldown.
+# Exercises repeats, pace targets, and open (no-target) steps.
+name: "Long run 16k — 2×3k tempo"
+sport: running
+date: 2026-06-15          # used by --schedule
+steps:
+  - { kind: warmup, distance_km: 4.0, target: open }
+  - repeat: 2
+    steps:
+      - { kind: active, distance_km: 3.0, target: { pace: ["4:50", "4:55"] }, name: "Tempo" }
+      - { kind: recovery, distance_km: 1.5, target: open }
+  - { kind: cooldown, distance_km: 4.5, target: open }
